@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useCalendar } from "../hooks/useCalendar";
-import Note from "./Note";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faPen } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faPen } from "@fortawesome/free-solid-svg-icons";
 
 const Calendar: React.FC = () => {
   const { currentMonth, handlePreviousMonth, handleNextMonth, addNote } = useCalendar();
@@ -40,45 +39,37 @@ const Calendar: React.FC = () => {
   };
 
   const handleDeleteNote = (date: string) => {
-    setNotes((prevNotes) => {
-      const updatedNotes = prevNotes.filter(note => note.date !== date);
-      localStorage.setItem("notes", JSON.stringify(updatedNotes));
-      return updatedNotes;
-    });
+    setNotes((prevNotes) =>
+      prevNotes.filter((note) => note.date !== date)
+    );
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-lg max-w-4xl w-full">
-      <div className="flex justify-between items-center mb-4">
-        
-        <button
-          onClick={handlePreviousMonth}
-          className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105"
-        >
-          &lt; Orqaga
-        </button>
-        <h2 className="text-lg font-bold">
-          {currentMonth.toLocaleString("default", {
-            month: "long",
-          })}{" "}
-          {currentMonth.getFullYear()}
+    <div className="p-6 rounded-lg shadow-md max-w-[1200px] w-full mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">
+          {currentMonth.toLocaleString("default", { month: "long" })} {currentMonth.getFullYear()}
         </h2>
-        <button
-          onClick={handleNextMonth}
-          className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105"
-        >
-          Oldinga &gt;
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handlePreviousMonth}
+            className="px-4 py-2 border rounded-lg text-gray-600 bg-white hover:bg-gray-200 transition"
+          >
+            &lt;
+          </button>
+          <button
+            onClick={handleNextMonth}
+            className="px-4 py-2 border rounded-lg text-gray-600 bg-white hover:bg-gray-200 transition"
+          >
+            &gt;
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 mb-2">
-        <div className="text-center font-bold">Sun</div>
-        <div className="text-center font-bold">Mon</div>
-        <div className="text-center font-bold">Tue</div>
-        <div className="text-center font-bold">Wed</div>
-        <div className="text-center font-bold">Thu</div>
-        <div className="text-center font-bold">Fri</div>
-        <div className="text-center font-bold">Sat</div>
+      <div className="grid grid-cols-7 gap-2 text-center font-semibold text-gray-500">
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          <div key={day} className="py-2 uppercase">{day}</div>
+        ))}
       </div>
 
       <div className="grid grid-cols-7 gap-2">
@@ -93,59 +84,77 @@ const Calendar: React.FC = () => {
           return (
             <div
               key={day}
-              className={`border border-gray-200 rounded p-2 text-center ${isSunday ? 'text-red-500' : ''}`}
+              className={`border relative p-4 min-h-20 bg-white shadow-sm hover:shadow-md transition ${isSunday ? "text-red-600" : "text-gray-800"}`}
               onClick={() => {
                 setSelectedDate(date);
                 setIsModalOpen(true);
               }}
             >
-              <div className="text-sm font-semibold">{day}</div>
-              <div>
-                {notes
-                  .filter((note) => note.date === date)
-                  .slice(0, 3)
-                  .map((note, idx) => (
-                    <div key={idx} className="flex justify-between items-center">
-                      <Note title={note.title} />
-                      <div className="grid gap-2">
-                        <button onClick={() => handleEditNote(date, note.title)} className="text-blue-500">
-                          <FontAwesomeIcon icon={faPen} />
-                        </button>
-                        <button onClick={() => handleDeleteNote(date)} className="text-red-500 ml-2">
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                      </div>
+              <div className="text-lg absolute font-semibold right-2 top-0">{day}</div>
+              {notes
+                .filter((note) => note.date === date)
+                .map((note, idx) => (
+                  <div
+                    key={idx}
+                    className="mt-2 bg-blue-100 text-blue-700 px-2 py-1 border border-blue-300 flex justify-between items-center shadow overflow-hidden"
+                    style={{ maxWidth: "250px" }}
+                  >
+                    <span className="text-sm truncate font-medium">{note.title}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleDeleteNote(date)}
+                        className="text-red-500 text-xs hover:underline whitespace-nowrap"
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                      <button
+                        onClick={() => handleEditNote(date, note.title)}
+                        className="text-blue-500 text-xs hover:underline whitespace-nowrap"
+                      >
+                        <FontAwesomeIcon icon={faPen} />
+                      </button>
                     </div>
-                  ))}
-              </div>
+                  </div>
+                ))}
             </div>
           );
         })}
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg" style={{ backgroundColor: '#f0f0f0' }}>
-            <h2 className="text-lg font-bold mb-4">Malumot qoshish</h2>
-            <textarea
-              placeholder="Title"
-              value={noteTitle}
-              onChange={(e) => setNoteTitle(e.target.value)}
-              className="border w-full px-4 py-2 mb-4 rounded resize-none"
-              rows={3}
-            />
-            <p className="text-sm text-gray-500 mb-4">{selectedDate}</p>
-            <button
-              onClick={handleAddNote}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Qoshish
-            </button>
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 ml-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              className="absolute top-4 right-4 text-gray-400 hover:text-black transition"
             >
-              Orqaga
+              ✖
+            </button>
+            <h2 className="text-xl font-bold mb-6 text-center">Add New Event</h2>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <textarea
+                placeholder="Enter note title"
+                value={noteTitle}
+                onChange={(e) => setNoteTitle(e.target.value)}
+                className="border w-full px-4 py-2 rounded-lg resize-none focus:ring-2 focus:ring-blue-500"
+                rows={2}
+              />
+            </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="border w-full px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <button
+              onClick={() => handleAddNote()}
+              className="w-full py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+            >
+              Add Event
             </button>
           </div>
         </div>
